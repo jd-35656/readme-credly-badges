@@ -24,16 +24,11 @@ repos:
       - id: forbid-new-submodules
         args: ["--submodule-type=git"]
 
-  # Code formatting
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
-    hooks:
-      - id: black
-
   - repo: https://github.com/PyCQA/isort
     rev: 6.0.1
     hooks:
       - id: isort
+        args: ["--profile", "black"]
 
   # Linting & static analysis
   - repo: https://github.com/charliermarsh/ruff-pre-commit
@@ -53,6 +48,12 @@ repos:
     hooks:
       - id: bandit
         exclude: ^tests/
+
+  # Code formatting
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
 
   # File format checking
   - repo: https://github.com/pre-commit/mirrors-prettier
