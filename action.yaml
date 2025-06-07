@@ -1,0 +1,52 @@
+name: "Credly Badges - md"
+description: "Add Credly badges in repo markdown file."
+author: Jitesh Sahani (JD) <jitesh.sahani@outlook.com>
+
+inputs:
+  CREDLY_USERNAME:
+    description: "Your Credly username"
+    required: false
+    default: ${{ github.actor }}
+
+  BADGE_SIZE:
+    description: "Defines the badge dimension."
+    default: "150x150"
+    required: false
+
+  GITHUB_API_URL:
+    description: "The GitHub URL, can changed for enterprise github"
+    default: https://api.github.com
+    required: false
+
+  GITHUB_TOKEN:
+    description: "GitHub token with write access to the repository"
+    required: true
+    default: ${{ github.token }}
+
+  GITHUB_REPO:
+    description: "Your GitHub repository"
+    default: ${{ github.repository }}
+    required: false
+
+  GITHUB_BRANCH:
+    description: "The branch where the README file is located"
+    default: "main"
+    required: false
+
+  README_FILE:
+    description: "The README file to update"
+    default: "README.md"
+    required: false
+
+  COMMIT_MESSAGE:
+    description: "Add a commit message of your choice"
+    default: "Updated README with new badges"
+    required: false
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+
+branding:
+  icon: "award"
+  color: "green"
