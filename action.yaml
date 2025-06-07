@@ -1,0 +1,72 @@
+name: "Credly Badges - md"
+author: Jitesh Sahani (JD) <jitesh.sahani@outlook.com>
+description: "Add Credly badges in repo markdown file."
+
+inputs:
+  CREDLY_USERNAME:
+    description: "Your Credly username"
+    required: false
+    default: ${{ github.actor }}
+
+  BADGE_SIZE:
+    description: "Defines the badge dimension."
+    default: "150x150"
+    required: false
+
+  GITHUB_API_URL:
+    description: "The GitHub URL, can changed for enterprise github"
+    default: https://api.github.com
+    required: false
+
+  GITHUB_TOKEN:
+    description: "GitHub token with write access to the repository"
+    required: true
+    default: ${{ github.token }}
+
+  GITHUB_REPO:
+    description: "Your GitHub repository"
+    default: ${{ github.repository }}
+    required: false
+
+  GITHUB_BRANCH:
+    description: "The branch where the README file is located"
+    default: "main"
+    required: false
+
+  README_FILE:
+    description: "The README file to update"
+    default: "README.md"
+    required: false
+
+  COMMIT_MESSAGE:
+    description: "Add a commit message of your choice"
+    default: "Updated README with new badges"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Compose v2
+      uses: docker/setup-docker-action@v4
+
+    - name: Run Tests
+      run: |
+        docker compose -f "${{ github.action_path }}/compose.yaml" run -T \
+          -e INPUT_CREDLY_USERNAME="${{ inputs.CREDLY_USERNAME }}" \
+          -e INPUT_BADGE_SIZE="${{ inputs.BADGE_SIZE }}" \
+          -e INPUT_GITHUB_API_URL="${{ inputs.GITHUB_API_URL }}" \
+          -e INPUT_GITHUB_TOKEN="${{ inputs.GITHUB_TOKEN }}" \
+          -e INPUT_GITHUB_REPO="${{ inputs.GITHUB_REPO }}" \
+          -e INPUT_GITHUB_BRANCH="${{ inputs.GITHUB_BRANCH }}" \
+          -e INPUT_README_FILE="${{ inputs.README_FILE }}" \
+          -e INPUT_COMMIT_MESSAGE="${{ inputs.COMMIT_MESSAGE }}" \
+          action \
+          poetry run python -m src.main
+      shell: bash
+
+branding:
+  icon: "award"
+  color: "green"

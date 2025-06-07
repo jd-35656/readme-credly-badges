@@ -37,3 +37,9 @@ services:
       - .:/app
     environment:
       - PYTHONPATH=/app
+  action:
+    build:
+      context: .
+      target: action
+    environment:
+      - PYTHONPATH=/app
