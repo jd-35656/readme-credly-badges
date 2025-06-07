@@ -8,6 +8,8 @@ services:
     command: poetry run python -m src.main
     volumes:
       - .:/app
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/app
     develop:
