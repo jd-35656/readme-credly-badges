@@ -24,7 +24,13 @@ services:
       target: test
     image: readme-credly-badges-test:latest
     container_name: readme-credly-badges-test
-    command: poetry run pytest --cov=src --cov-report=term
+    command:
+      - poetry
+      - run
+      - pytest
+      - --cov=src
+      - --cov-report=term
+      - --cov-report=term-missing
     volumes:
       - .:/app
     environment:
