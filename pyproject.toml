@@ -1,0 +1,13 @@
+[project]
+name = "readme-credly-badges"
+version = "0.1.0"
+description = "A Python GitHub Action that auto-updates the README with the credly badge details."
+authors = [{ name = "Jitesh Sahani (JD)", email = "jitesh.sahani@outlook.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["requests (>=2.32.3,<2.33.0)", "pygithub (>=2.6.1,<2.7.0)"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
