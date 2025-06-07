@@ -40,6 +40,6 @@ services:
   action:
     build:
       context: .
-      target: action
+      target: main
     environment:
       - PYTHONPATH=/app
