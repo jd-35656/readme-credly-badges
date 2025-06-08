@@ -5,6 +5,7 @@ END_COMMENT = "<!-- END CREDLY BADGES -->"
 
 CREDLY_USERNAME = os.getenv("INPUT_CREDLY_USERNAME")
 BADGE_SIZE = os.getenv("INPUT_BADGE_SIZE", "150x150")
+BADGE_SORT_BY = os.getenv("INPUT_BADGE_SORT_BY", "issued")
 
 GITHUB_API_URL = os.getenv("INPUT_GITHUB_API_URL", "https://api.github.com")
 GITHUB_TOKEN = os.getenv("INPUT_GITHUB_TOKEN")
