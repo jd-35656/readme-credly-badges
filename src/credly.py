@@ -5,6 +5,9 @@ from typing import Dict, List
 
 import requests
 
+from src.settings import BADGE_SORT_BY
+from src.utils import sort_by_field
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +32,7 @@ class Credly:
             raise ConnectionError(f"Failed to fetch badges for {self.username}") from e
 
         badges = []
-        data = response.json().get("data", [])
+        data = sort_by_field(response.json().get("data", []), BADGE_SORT_BY)
 
         for badge in data:
             badge_id = badge.get("id")

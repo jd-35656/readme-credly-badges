@@ -13,6 +13,11 @@ inputs:
     default: "150x150"
     required: false
 
+  BADGE_SORT_BY:
+    description: "Badge order by."
+    default: "issued"
+    required: false
+
   GITHUB_API_URL:
     description: "The GitHub URL, can changed for enterprise github"
     default: https://api.github.com

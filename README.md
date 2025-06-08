@@ -53,16 +53,17 @@ jobs:
 
 <!-- markdownlint-disable MD013 -->
 
-| Input Name        | Description                                   | Default                          | Required |
-| ----------------- | --------------------------------------------- | -------------------------------- | -------- |
-| `CREDLY_USERNAME` | Your Credly username                          | `<username>`                     | ❌       |
-| `BADGE_SIZE`      | Badge image size (e.g., `150x150`, `680x680`) | `150x150`                        | ❌       |
-| `GITHUB_API_URL`  | GitHub API URL (for GitHub Enterprise use)    | `https://api.github.com`         | ❌       |
-| `GITHUB_TOKEN`    | GitHub token with write access to the repo    | `-`                              | ✅       |
-| `GITHUB_REPO`     | GitHub repository to update                   | `<username>/<repo>`              | ❌       |
-| `GITHUB_BRANCH`   | Branch where the target file is located       | `main`                           | ❌       |
-| `README_FILE`     | Path to the markdown file to update           | `README.md`                      | ❌       |
-| `COMMIT_MESSAGE`  | Custom commit message for the update          | `Updated README with new badges` | ❌       |
+| Input Name        | Description                                             | Default                          | Required |
+| ----------------- | ------------------------------------------------------- | -------------------------------- | -------- |
+| `CREDLY_USERNAME` | Your Credly username                                    | `<username>`                     | ❌       |
+| `BADGE_SIZE`      | Badge image size (e.g., `150x150`, `680x680`)           | `150x150`                        | ❌       |
+| `BADGE_SORT_BY`   | Arrange badge order (`issued`, `updated` or `accepted`) | `issued`                         | ❌       |
+| `GITHUB_API_URL`  | GitHub API URL (for GitHub Enterprise use)              | `https://api.github.com`         | ❌       |
+| `GITHUB_TOKEN`    | GitHub token with write access to the repo              | `-`                              | ✅       |
+| `GITHUB_REPO`     | GitHub repository to update                             | `<username>/<repo>`              | ❌       |
+| `GITHUB_BRANCH`   | Branch where the target file is located                 | `main`                           | ❌       |
+| `README_FILE`     | Path to the markdown file to update                     | `README.md`                      | ❌       |
+| `COMMIT_MESSAGE`  | Custom commit message for the update                    | `Updated README with new badges` | ❌       |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -87,6 +88,7 @@ jobs:
         with:
           CREDLY_USERNAME: "your-credly-username"
           BADGE_SIZE: "150x150"
+          BADGE_SORT_BY: "issued"
           GITHUB_API_URL: "https://api.github.com"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
