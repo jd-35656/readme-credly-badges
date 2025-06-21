@@ -116,5 +116,5 @@ issue_format = "[#{issue}](https://github.com/jd-35656/readme-credly-badges/issu
 underlines = [ "", "", "" ]
 
 [tool.nox.dependency-group]
-test = [ "pytest >=8.3.5", "pytest-cov >=6.1.1" ]
+test = [ "pytest >=8.3.5", "pytest-cov >=6.1.1", "toml" ]
 docs = [ "towncrier" ]
