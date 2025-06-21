@@ -48,7 +48,7 @@ jobs:
       - name: Bump changelog and version
         run: |
           nox --error-on-missing-interpreters --non-interactive --session build_changelog -- "$RELEASE_VERSION"
-          nox --error-on-missing-interpreters --non-interactive --session build_version -- "$RELEASE_VERSION"
+          nox --error-on-missing-interpreters --non-interactive --session bump_version -- "$RELEASE_VERSION"
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
