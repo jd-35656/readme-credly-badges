@@ -40,6 +40,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: ""
 
+      - name: Move v1 tag to latest release
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git tag -f v1 "${{ steps.get-version.outputs.version }}"
+          git push origin -f v1
+
   create-release:
     name: Create GitHub Release
     needs: [create-tag]

@@ -39,7 +39,7 @@ name: Update Credly Badges
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs daily at 00:00 UTC
+    - cron: '0 0 * * *' # Runs daily at 00:00 UTC
 
 jobs:
   update-readme:
@@ -55,15 +55,15 @@ jobs:
 
 | Input Name        | Description                                             | Default                          | Required |
 | ----------------- | ------------------------------------------------------- | -------------------------------- | -------- |
-| `CREDLY_USERNAME` | Your Credly username                                    | `<username>`                     | ❌       |
-| `BADGE_SIZE`      | Badge image size (e.g., `150x150`, `680x680`)           | `150x150`                        | ❌       |
-| `BADGE_SORT_BY`   | Arrange badge order (`issued`, `updated` or `accepted`) | `issued`                         | ❌       |
-| `GITHUB_API_URL`  | GitHub API URL (for GitHub Enterprise use)              | `https://api.github.com`         | ❌       |
-| `GITHUB_TOKEN`    | GitHub token with write access to the repo              | `-`                              | ✅       |
-| `GITHUB_REPO`     | GitHub repository to update                             | `<username>/<repo>`              | ❌       |
-| `GITHUB_BRANCH`   | Branch where the target file is located                 | `main`                           | ❌       |
-| `README_FILE`     | Path to the markdown file to update                     | `README.md`                      | ❌       |
-| `COMMIT_MESSAGE`  | Custom commit message for the update                    | `Updated README with new badges` | ❌       |
+| `credly_username` | Your Credly username                                    | `<username>`                     | ❌       |
+| `badge_size`      | Badge image size (e.g., `150x150`, `680x680`)           | `150x150`                        | ❌       |
+| `badge_sort_by`   | Arrange badge order (`issued`, `updated` or `accepted`) | `issued`                         | ❌       |
+| `github_api_url`  | GitHub API URL (for GitHub Enterprise use)              | `https://api.github.com`         | ❌       |
+| `github_token`    | GitHub token with write access to the repo              | `{github.token}`                 | ✅       |
+| `github_repo`     | GitHub repository to update                             | `<username>/<repo>`              | ❌       |
+| `github_branch`   | Branch where the target file is located                 | `main`                           | ❌       |
+| `readme_file`     | Path to the markdown file to update                     | `README.md`                      | ❌       |
+| `commit_message`  | Custom commit message for the update                    | `Updated README with new badges` | ❌       |
 
 <!-- markdownlint-enable MD013 -->
 
@@ -74,7 +74,7 @@ name: Update Credly Badges
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs daily at 00:00 UTC
+    - cron: '0 0 * * *' # Runs daily at 00:00 UTC
 
 jobs:
   update-readme:
@@ -86,15 +86,15 @@ jobs:
       - name: Update Badges in README
         uses: jd-35656/readme-credly-badges@main
         with:
-          CREDLY_USERNAME: "your-credly-username"
-          BADGE_SIZE: "150x150"
-          BADGE_SORT_BY: "issued"
-          GITHUB_API_URL: "https://api.github.com"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPO: ${{ github.repository }}
-          GITHUB_BRANCH: "main"
-          README_FILE: "README.md"
-          COMMIT_MESSAGE: "Updated README with Credly badges"
+          credly_username: 'your-credly-username'
+          badge_size: '150x150'
+          badge_sort_by: 'issued'
+          github_api_url: 'https://api.github.com'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_repo: ${{ github.repository }}
+          github_branch: 'main'
+          readme_file: 'README.md'
+          commit_message: 'Updated README with Credly badges'
 ```
 
 ---
