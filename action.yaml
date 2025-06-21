@@ -64,11 +64,11 @@ runs:
         python-version: "3.11"
 
     - name: Install dependencies
-      run: pip install .
+      run: pip install $GITHUB_ACTION_PATH
       shell: bash
 
     - name: Run badge updater
-      run: python -m readme_credly_badges.entrypoint
+      run: python "$GITHUB_ACTION_PATH/src/readme_credly_badges/entrypoint.py"
       shell: bash
       env:
         INPUT_CREDLY_USERNAME: ${{ inputs.credly_username }}
