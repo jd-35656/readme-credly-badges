@@ -1,57 +1,82 @@
-name: "Credly Badges - md"
-description: "Add Credly badges in repo markdown file."
+name: "Readme Credly Badges"
+description: "Add Credly badges to README from your Credly account."
 author: Jitesh Sahani (JD) <jitesh.sahani@outlook.com>
-
-inputs:
-  CREDLY_USERNAME:
-    description: "Your Credly username"
-    required: false
-    default: ${{ github.actor }}
-
-  BADGE_SIZE:
-    description: "Defines the badge dimension."
-    default: "150x150"
-    required: false
-
-  BADGE_SORT_BY:
-    description: "Badge order by."
-    default: "issued"
-    required: false
-
-  GITHUB_API_URL:
-    description: "The GitHub URL, can changed for enterprise github"
-    default: https://api.github.com
-    required: false
-
-  GITHUB_TOKEN:
-    description: "GitHub token with write access to the repository"
-    required: true
-    default: ${{ github.token }}
-
-  GITHUB_REPO:
-    description: "Your GitHub repository"
-    default: ${{ github.repository }}
-    required: false
-
-  GITHUB_BRANCH:
-    description: "The branch where the README file is located"
-    default: "main"
-    required: false
-
-  README_FILE:
-    description: "The README file to update"
-    default: "README.md"
-    required: false
-
-  COMMIT_MESSAGE:
-    description: "Add a commit message of your choice"
-    default: "Updated README with new badges"
-    required: false
-
-runs:
-  using: "docker"
-  image: "Dockerfile"
 
 branding:
   icon: "award"
   color: "green"
+
+inputs:
+  credly_username:
+    description: "Your Credly username"
+    required: false
+    default: ${{ github.actor }}
+
+  badge_size:
+    description: "Defines the badge dimension"
+    required: false
+    default: "150x150"
+
+  badge_sort_by:
+    description: "Sort badges by"
+    required: false
+    default: "issued"
+
+  github_api_url:
+    description: "GitHub API URL (for GitHub Enterprise)"
+    required: false
+    default: https://api.github.com
+
+  github_token:
+    description: "GitHub token with write access to the repo"
+    required: true
+    default: ${{ github.token }}
+
+  github_repo:
+    description: "GitHub repo (owner/repo)"
+    required: false
+    default: ${{ github.repository }}
+
+  github_branch:
+    description: "Branch where README is located"
+    required: false
+    default: "main"
+
+  readme_file:
+    description: "Path to the README file"
+    required: false
+    default: "README.md"
+
+  commit_message:
+    description: "Commit message for README update"
+    required: false
+    default: "Updated README with new badges"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout user repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: pip install $GITHUB_ACTION_PATH
+      shell: bash
+
+    - name: Run badge updater
+      run: python "$GITHUB_ACTION_PATH/src/readme_credly_badges/entrypoint.py"
+      shell: bash
+      env:
+        INPUT_CREDLY_USERNAME: ${{ inputs.credly_username }}
+        INPUT_BADGE_SIZE: ${{ inputs.badge_size }}
+        INPUT_BADGE_SORT_BY: ${{ inputs.badge_sort_by }}
+        INPUT_GITHUB_API_URL: ${{ inputs.github_api_url }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_GITHUB_REPO: ${{ inputs.github_repo }}
+        INPUT_GITHUB_BRANCH: ${{ inputs.github_branch }}
+        INPUT_README_FILE: ${{ inputs.readme_file }}
+        INPUT_COMMIT_MESSAGE: ${{ inputs.commit_message }}

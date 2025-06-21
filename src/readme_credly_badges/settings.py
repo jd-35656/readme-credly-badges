@@ -13,6 +13,4 @@ GITHUB_REPO = os.getenv("INPUT_GITHUB_REPO")
 GITHUB_BRANCH = os.getenv("INPUT_GITHUB_BRANCH", "main")
 README_FILE = os.getenv("INPUT_README_FILE", "README.md")
 
-COMMIT_MESSAGE = os.getenv(
-    "INPUT_COMMIT_MESSAGE", "Update README files with Credly badges."
-)
+COMMIT_MESSAGE = os.getenv("INPUT_COMMIT_MESSAGE", "Update README files with Credly badges.")

@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class GithubRepo:
-
     def __init__(
         self,
         commit_message: str,
@@ -26,9 +25,7 @@ class GithubRepo:
         self.readme_filename = readme_filename
 
         try:
-            logger.info(
-                f"Connecting to GitHub repository {repository} on branch {branch} using API URL {gh_api_url}"
-            )
+            logger.info(f"Connecting to GitHub repository {repository} on branch {branch} using API URL {gh_api_url}")
             gh = Github(
                 base_url=gh_api_url,
                 login_or_token=gh_token,
@@ -44,39 +41,27 @@ class GithubRepo:
     def get_readme(self) -> str:
         """Fetch the specified README file's content."""
         try:
-            logger.info(
-                f"Fetching {self.readme_filename} from branch {self.branch} of repository {self.repository}"
-            )
+            logger.info(f"Fetching {self.readme_filename} from branch {self.branch} of repository {self.repository}")
             file_content = self.repo.get_contents(self.readme_filename, ref=self.branch)
 
             if isinstance(file_content, list):
-                raise ValueError(
-                    f"{self.readme_filename} is a directory, expected a file."
-                )
+                raise ValueError(f"{self.readme_filename} is a directory, expected a file.")
 
             return base64.b64decode(file_content.content).decode("utf-8")
 
         except UnknownObjectException as e:
-            logger.error(
-                f"Failed to find {self.readme_filename} in repository {self.repository}: {e}"
-            )
-            raise FileNotFoundError(
-                f"{self.readme_filename} not found in the repository."
-            ) from e
+            logger.error(f"Failed to find {self.readme_filename} in repository {self.repository}: {e}")
+            raise FileNotFoundError(f"{self.readme_filename} not found in the repository.") from e
 
     def save_readme(self, new_content: str):
         """Update the specified README file with new content."""
         try:
-            logger.info(
-                f"Updating {self.readme_filename} in branch {self.branch} of repository {self.repository}"
-            )
+            logger.info(f"Updating {self.readme_filename} in branch {self.branch} of repository {self.repository}")
             file_content = self.repo.get_contents(self.readme_filename, ref=self.branch)
 
             # Defensive check in case a list is returned
             if isinstance(file_content, list):
-                raise ValueError(
-                    f"{self.readme_filename} is a directory, expected a single file."
-                )
+                raise ValueError(f"{self.readme_filename} is a directory, expected a single file.")
 
             self.repo.update_file(
                 path=self.readme_filename,
@@ -84,13 +69,7 @@ class GithubRepo:
                 content=new_content,
                 sha=file_content.sha,
             )
-            logger.info(
-                f"{self.readme_filename} updated successfully in repository {self.repository}."
-            )
+            logger.info(f"{self.readme_filename} updated successfully in repository {self.repository}.")
         except UnknownObjectException as e:
-            logger.error(
-                f"Failed to find {self.readme_filename} in repository {self.repository}: {e}"
-            )
-            raise FileNotFoundError(
-                f"{self.readme_filename} not found in the repository."
-            ) from e
+            logger.error(f"Failed to find {self.readme_filename} in repository {self.repository}: {e}")
+            raise FileNotFoundError(f"{self.readme_filename} not found in the repository.") from e
