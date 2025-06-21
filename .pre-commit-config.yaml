@@ -34,7 +34,8 @@ repos:
           ]
         additional_dependencies:
           - "nox"
-          - "toml"
+          - "tomli"
+          - "tomli_w"
           - "requests >=2.32.3"
           - "pygithub >=2.6.1"
           - "pytest >=8.3.5"

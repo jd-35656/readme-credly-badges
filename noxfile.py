@@ -81,7 +81,7 @@ def build_changelog(session: nox.Session) -> None:
 @nox.session(python=PYTHON_DEFAULT_VERSION)
 def bump_version(session):
     """Bump project version via update_version.py"""
-    session.install("toml")
+    session.install("tomli>=2.0.1", "tomli-w>=1.0.0")
 
     if not session.posargs:
         session.error("Usage: nox -s bump -- <new_version>")
