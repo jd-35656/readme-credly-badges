@@ -30,7 +30,7 @@ def tests(session: nox.Session) -> None:
 @nox.session
 def coverage(session: nox.Session) -> None:
     """Coverage analysis"""
-    session.install("coverage")
+    session.install("coverage[toml]")
     session.run("coverage", "report", "--show-missing", "--fail-under=70")
     session.run("coverage", "erase")
 

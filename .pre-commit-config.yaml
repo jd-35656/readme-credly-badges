@@ -31,8 +31,6 @@ repos:
             "--strict-equality",
             "--no-implicit-optional",
             "--check-untyped-defs",
-            "--install-types",
-            "--non-interactive",
           ]
         additional_dependencies:
           - "nox"
@@ -40,6 +38,8 @@ repos:
           - "requests >=2.32.3"
           - "pygithub >=2.6.1"
           - "pytest >=8.3.5"
+          - "types-toml"
+          - "types-requests"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
