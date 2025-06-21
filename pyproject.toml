@@ -1,13 +1,13 @@
 [project]
 name = "readme-credly-badges"
-version = "0.1.0"
+version = "v1.0.0"
 description = "A Python GitHub Action that auto-updates the README with the Credly badge details."
 readme = "README.md"
 keywords = [  ]
-
 license = "MIT"
-authors = [ { name = "jd-35656", email = "jitesh.sahani@outlook.com" } ]
-
+authors = [
+  { name = "jd-35656", email = "jitesh.sahani@outlook.com" },
+]
 requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -22,8 +22,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-
-dependencies = [ "pygithub>=2.6.1", "requests>=2.32.3" ]
+dependencies = [
+  "pygithub>=2.6.1",
+  "requests>=2.32.3",
+]
 
 urls.Documentation = "https://github.com/jd-35656/readme-credly-badges#readme"
 urls.Issues = "https://github.com/jd-35656/readme-credly-badges/issues"
@@ -32,14 +34,13 @@ urls.Source = "https://github.com/jd-35656/readme-credly-badges"
 [tool.ruff]
 target-version = "py311"
 line-length = 121
-src = [ "src" ]
+src = [
+  "src",
+]
 
-# Formatting options
 format.indent-style = "space"
 format.quote-style = "double"
 format.skip-magic-trailing-comma = false
-
-# Linting options
 lint.select = [
   "A",
   "ARG",
@@ -69,13 +70,17 @@ lint.select = [
   "UP",
   "W",
 ]
-
 lint.per-file-ignores."src/readme_credly_badges/adapter/github_repo.py" = [
   "PLR0913",
 ]
-lint.per-file-ignores."tests/*" = [ "N806", "S101", "S106" ]
-
-lint.isort.known-first-party = [ "readme_credly_badges" ]
+lint.per-file-ignores."tests/*" = [
+  "N806",
+  "S101",
+  "S106",
+]
+lint.isort.known-first-party = [
+  "readme_credly_badges",
+]
 lint.mccabe.max-complexity = 15
 
 [tool.codespell]
@@ -87,12 +92,23 @@ quiet-level = 2
 minversion = "8.0"
 log_cli = true
 log_cli_level = "INFO"
-testpaths = [ "tests" ]
-pythonpath = [ "src" ]
-addopts = [ "-ra", "--strict-config", "--strict-markers" ]
+testpaths = [
+  "tests",
+]
+pythonpath = [
+  "src",
+]
+addopts = [
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+]
 
 [tool.coverage.run]
-source_pkgs = [ "readme_credly_badges", "tests" ]
+source_pkgs = [
+  "readme_credly_badges",
+  "tests",
+]
 branch = true
 parallel = true
 
@@ -101,10 +117,17 @@ readme_credly_badges = [
   "src/readme_credly_badges",
   "*/readme-credly-badges/src/readme_credly_badges",
 ]
-tests = [ "tests", "*/readme-credly-badges/tests" ]
+tests = [
+  "tests",
+  "*/readme-credly-badges/tests",
+]
 
 [tool.coverage.report]
-exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
 
 [tool.towncrier]
 directory = "changelog.d"
@@ -113,8 +136,18 @@ package = "readme_credly_badges"
 start_string = "<!-- towncrier release notes start -->\n"
 title_format = "## [{version}](https://github.com/jd-35656/readme-credly-badges/tree/{version}) - {project_date}"
 issue_format = "[#{issue}](https://github.com/jd-35656/readme-credly-badges/issues/{issue})"
-underlines = [ "", "", "" ]
+underlines = [
+  "",
+  "",
+  "",
+]
 
 [tool.nox.dependency-group]
-test = [ "pytest >=8.3.5", "pytest-cov >=6.1.1", "toml" ]
-docs = [ "towncrier" ]
+test = [
+  "pytest >=8.3.5",
+  "pytest-cov >=6.1.1",
+  "toml",
+]
+docs = [
+  "towncrier",
+]
