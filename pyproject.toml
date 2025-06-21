@@ -106,5 +106,15 @@ tests = [ "tests", "*/readme-credly-badges/tests" ]
 [tool.coverage.report]
 exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
 
+[tool.towncrier]
+directory = "changelog.d"
+filename = "docs/changelog.md"
+package = "readme_credly_badges"
+start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## [{version}](https://github.com/jd-35656/readme-credly-badges/tree/{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/jd-35656/readme-credly-badges/issues/{issue})"
+underlines = [ "", "", "" ]
+
 [tool.nox.dependency-group]
 test = [ "pytest >=8.3.5", "pytest-cov >=6.1.1" ]
+docs = [ "towncrier" ]
