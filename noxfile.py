@@ -78,7 +78,7 @@ def build_changelog(session: nox.Session) -> None:
     session.run("towncrier", "build", "--version", session.posargs[0], "--yes")
 
 
-@nox.session(python=PYTHON_DEFAULT_VERSION, name="bump")
+@nox.session(python=PYTHON_DEFAULT_VERSION)
 def bump_version(session):
     """Bump project version via update_version.py"""
     session.install("toml")
