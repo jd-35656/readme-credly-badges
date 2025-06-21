@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from src.credly import Credly
+from readme_credly_badges.adapter import Credly
 
 # Sample valid badge data
 VALID_BADGE = {
@@ -23,7 +23,7 @@ BADGES_WITH_MISSING_FIELDS = [
 ]
 
 
-@patch("src.credly.requests.get")
+@patch("readme_credly_badges.adapter.credly.requests.get")
 def test_fetch_valid_badges(mock_get):
     """Test that valid badges are returned correctly."""
     mock_response = MagicMock()
@@ -40,7 +40,7 @@ def test_fetch_valid_badges(mock_get):
     assert badges[0]["image_url"] == "https://example.com/image.png"
 
 
-@patch("src.credly.requests.get")
+@patch("readme_credly_badges.adapter.credly.requests.get")
 def test_fetch_skips_incomplete_badges(mock_get):
     """Test that incomplete badges are skipped."""
     mock_response = MagicMock()
@@ -54,13 +54,11 @@ def test_fetch_skips_incomplete_badges(mock_get):
     assert badges == []
 
 
-@patch("src.credly.requests.get")
+@patch("readme_credly_badges.adapter.credly.requests.get")
 def test_fetch_handles_http_error(mock_get):
     """Test that HTTP errors raise a ConnectionError."""
     mock_response = MagicMock()
-    mock_response.raise_for_status.side_effect = requests.exceptions.RequestException(
-        "Boom!"
-    )
+    mock_response.raise_for_status.side_effect = requests.exceptions.RequestException("Boom!")
     mock_get.return_value = mock_response
 
     credly = Credly("testuser")
@@ -68,7 +66,7 @@ def test_fetch_handles_http_error(mock_get):
         credly.fetch_badges()
 
 
-@patch("src.credly.requests.get")
+@patch("readme_credly_badges.adapter.credly.requests.get")
 def test_fetch_handles_network_error(mock_get):
     """Test that request exceptions raise a ConnectionError."""
     mock_get.side_effect = requests.exceptions.RequestException("Network down")
@@ -78,7 +76,7 @@ def test_fetch_handles_network_error(mock_get):
         credly.fetch_badges()
 
 
-@patch("src.credly.requests.get")
+@patch("readme_credly_badges.adapter.credly.requests.get")
 def test_fetch_handles_missing_data_key(mock_get):
     """Test fallback if 'data' key is missing."""
     mock_response = MagicMock()

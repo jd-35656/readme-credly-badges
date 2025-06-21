@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.utils import sort_by_field
+from readme_credly_badges.utils import sort_by_field
 
 
 def test_sort_success():
@@ -26,7 +26,7 @@ def test_sort_missing_key_returns_original():
 
 
 def test_sort_empty_list_returns_empty():
-    data = []
+    data: list = []
     result = sort_by_field(data)
     assert result == []
 

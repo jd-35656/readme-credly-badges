@@ -1,4 +1,4 @@
-"Test cases for the GithubRepo class in src/gitrepo.py"
+"Test cases for the GithubRepo class in readme_credly_badges.adapter.readme_credly_badges.adapter/github_repo.py"
 
 import base64
 from unittest.mock import MagicMock, patch
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from github.GithubException import GithubException, UnknownObjectException
 
-from src.gitrepo import GithubRepo
+from readme_credly_badges.adapter import GithubRepo
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def mock_repo():
 
 @pytest.fixture
 def mock_github(mock_repo):
-    with patch("src.gitrepo.Github") as MockGithub:
+    with patch("readme_credly_badges.adapter.github_repo.Github") as MockGithub:
         MockGithub.return_value.get_repo.return_value = mock_repo
         yield MockGithub, mock_repo
 
@@ -52,7 +52,7 @@ def test_initialization_success(mock_github):
 
 
 def test_initialization_auth_failure():
-    with patch("src.gitrepo.Github") as MockGithub:
+    with patch("readme_credly_badges.adapter.github_repo.Github") as MockGithub:
         MockGithub.return_value.get_repo.side_effect = GithubException(401, {}, {})
         with pytest.raises(RuntimeError):
             GithubRepo(
@@ -75,9 +75,7 @@ def test_get_readme_success(github_repo):
 
     result = repo.get_readme()
     assert result == content_str
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)
 
 
 def test_get_readme_file_not_found(github_repo):
@@ -86,9 +84,7 @@ def test_get_readme_file_not_found(github_repo):
 
     with pytest.raises(FileNotFoundError):
         repo.get_readme()
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)
 
 
 def test_get_readme_when_readme_is_directory(github_repo):
@@ -99,9 +95,7 @@ def test_get_readme_when_readme_is_directory(github_repo):
         repo.get_readme()
 
     assert f"{repo.readme_filename} is a directory" in str(exc_info.value)
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)
 
 
 def test_save_readme_success(github_repo):
@@ -112,9 +106,7 @@ def test_save_readme_success(github_repo):
 
     repo.save_readme("New Content")
 
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)
     mock_repo.update_file.assert_called_once_with(
         path=repo.readme_filename,
         message=repo.commit_message,
@@ -130,9 +122,7 @@ def test_save_readme_file_not_found(github_repo):
     with pytest.raises(FileNotFoundError):
         repo.save_readme("New Content")
 
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)
 
 
 def test_save_readme_when_readme_is_directory(github_repo):
@@ -143,6 +133,4 @@ def test_save_readme_when_readme_is_directory(github_repo):
         repo.save_readme("New Content")
 
     assert f"{repo.readme_filename} is a directory" in str(exc_info.value)
-    mock_repo.get_contents.assert_called_once_with(
-        repo.readme_filename, ref=repo.branch
-    )
+    mock_repo.get_contents.assert_called_once_with(repo.readme_filename, ref=repo.branch)

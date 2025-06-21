@@ -1,12 +1,11 @@
 "Credly Module"
 
 import logging
-from typing import Dict, List
 
 import requests
 
-from src.settings import BADGE_SORT_BY
-from src.utils import sort_by_field
+from readme_credly_badges.settings import BADGE_SORT_BY
+from readme_credly_badges.utils import sort_by_field
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,7 @@ class Credly:
         self.timeout = timeout
         self.url = f"https://www.credly.com/users/{self.username}/badges.json"
 
-    def fetch_badges(self) -> List[Dict[str, str]]:
+    def fetch_badges(self) -> list[dict[str, str]]:
         """Fetch badges for the user from the Credly .json endpoint, ensuring all required fields are present."""
         try:
             logger.info(f"Fetching badges for {self.username} from {self.url}")
@@ -42,14 +41,10 @@ class Credly:
 
             # Ensure none of the fields are empty or missing
             if not (badge_id and name and image_url):
-                logger.warning(
-                    f"Skipping incomplete badge: id={badge_id}, name={name}, image_url={image_url}"
-                )
+                logger.warning(f"Skipping incomplete badge: id={badge_id}, name={name}, image_url={image_url}")
                 continue
 
-            logger.info(
-                f"Found badge: id={badge_id}, name={name}, image_url={image_url}"
-            )
+            logger.info(f"Found badge: id={badge_id}, name={name}, image_url={image_url}")
             badges.append(
                 {
                     "name": name.strip(),

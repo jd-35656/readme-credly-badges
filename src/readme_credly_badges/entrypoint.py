@@ -2,9 +2,8 @@
 
 import logging
 
-from src.credly import Credly
-from src.gitrepo import GithubRepo
-from src.settings import (
+from readme_credly_badges.adapter import Credly, GithubRepo
+from readme_credly_badges.settings import (
     BADGE_SIZE,
     COMMIT_MESSAGE,
     CREDLY_USERNAME,
@@ -32,8 +31,7 @@ def generate_new_readme_content(badges, old_readme_content):
         raise ValueError("Credly badge section markers not found in README.")
 
     markdown_badges = "\n".join(
-        f"[![{badge['name']}]({badge['image_url']})]({badge['url']})"
-        for badge in badges
+        f"[![{badge['name']}]({badge['image_url']})]({badge['url']})" for badge in badges
     ).replace(
         "https://images.credly.com/images/",
         f"https://images.credly.com/size/{BADGE_SIZE}/images/",
@@ -49,12 +47,8 @@ def main():
     "Main function to update the README with Credly badges."
     logger.info("Starting the README update process with Credly badges.")
     if not (CREDLY_USERNAME and GITHUB_TOKEN and GITHUB_REPO):
-        logger.error(
-            "Environment variables CREDLY_USERNAME, GITHUB_TOKEN, and GITHUB_REPO must be set."
-        )
-        raise ValueError(
-            "Environment variables CREDLY_USERNAME, GITHUB_TOKEN, and GITHUB_REPO must be set."
-        )
+        logger.error("Environment variables CREDLY_USERNAME, GITHUB_TOKEN, and GITHUB_REPO must be set.")
+        raise ValueError("Environment variables CREDLY_USERNAME, GITHUB_TOKEN, and GITHUB_REPO must be set.")
 
     credly = Credly(username=CREDLY_USERNAME)
     github_repo = GithubRepo(
@@ -67,9 +61,7 @@ def main():
     )
     badges = credly.fetch_badges()
     old_readme_content = github_repo.get_readme()
-    new_readme_content = generate_new_readme_content(
-        badges=badges, old_readme_content=old_readme_content
-    )
+    new_readme_content = generate_new_readme_content(badges=badges, old_readme_content=old_readme_content)
 
     if new_readme_content.strip() != old_readme_content.strip():
         github_repo.save_readme(new_content=new_readme_content)
@@ -79,4 +71,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()  # pragma: no cover
+    main()

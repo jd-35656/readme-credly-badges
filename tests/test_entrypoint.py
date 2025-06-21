@@ -3,25 +3,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import src.main as main_module
+import readme_credly_badges.entrypoint as main_module
 
 
 def test_generate_new_readme_content_success():
-    old_readme = (
-        "Header\n"
-        "<!-- START CREDLY BADGES -->\n"
-        "old badges\n"
-        "<!-- END CREDLY BADGES -->\n"
-        "Footer\n"
-    )
+    old_readme = "Header\n<!-- START CREDLY BADGES -->\nold badges\n<!-- END CREDLY BADGES -->\nFooter\n"
     badges = [
         {"name": "Badge1", "image_url": "image1.png", "url": "http://url1"},
         {"name": "Badge2", "image_url": "image2.png", "url": "http://url2"},
     ]
 
-    expected_new_badges = (
-        "[![Badge1](image1.png)](http://url1)\n" "[![Badge2](image2.png)](http://url2)"
-    )
+    expected_new_badges = "[![Badge1](image1.png)](http://url1)\n[![Badge2](image2.png)](http://url2)"
 
     new_content = main_module.generate_new_readme_content(badges, old_readme)
     assert "<!-- START CREDLY BADGES -->" in new_content
@@ -38,13 +30,13 @@ def test_generate_new_readme_content_raises_if_markers_missing():
         main_module.generate_new_readme_content([], old_readme)
 
 
-@patch("src.main.Credly")
-@patch("src.main.GithubRepo")
+@patch("readme_credly_badges.entrypoint.Credly")
+@patch("readme_credly_badges.entrypoint.GithubRepo")
 def test_main_happy_path(mock_githubrepo_cls, mock_credly_cls, caplog):
     caplog.set_level(logging.INFO)
     # Mock environment variables in settings module
     with patch.multiple(
-        "src.main",
+        "readme_credly_badges.entrypoint",
         CREDLY_USERNAME="user",
         GITHUB_TOKEN="token",
         GITHUB_REPO="repo",
@@ -86,12 +78,12 @@ def test_main_happy_path(mock_githubrepo_cls, mock_credly_cls, caplog):
         assert "README updated with new Credly badges." in caplog.text
 
 
-@patch("src.main.Credly")
-@patch("src.main.GithubRepo")
+@patch("readme_credly_badges.entrypoint.Credly")
+@patch("readme_credly_badges.entrypoint.GithubRepo")
 def test_main_no_update_needed(mock_githubrepo_cls, mock_credly_cls, caplog):
     caplog.set_level(logging.INFO)
     with patch.multiple(
-        "src.main",
+        "readme_credly_badges.entrypoint",
         CREDLY_USERNAME="user",
         GITHUB_TOKEN="token",
         GITHUB_REPO="repo",
@@ -118,13 +110,15 @@ def test_main_no_update_needed(mock_githubrepo_cls, mock_credly_cls, caplog):
         assert "README is already up to date." in caplog.text
 
 
-def test_main_missing_env_vars(monkeypatch):
+def test_main_missing_env_vars():
     # Clear env vars to simulate missing variables
-    with patch.multiple(
-        "src.main",
-        CREDLY_USERNAME=None,
-        GITHUB_TOKEN=None,
-        GITHUB_REPO=None,
+    with (
+        patch.multiple(
+            "readme_credly_badges.entrypoint",
+            CREDLY_USERNAME=None,
+            GITHUB_TOKEN=None,
+            GITHUB_REPO=None,
+        ),
+        pytest.raises(ValueError),
     ):
-        with pytest.raises(ValueError):
-            main_module.main()
+        main_module.main()
