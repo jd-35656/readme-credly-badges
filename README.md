@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update Badges in README
-        uses: jd-35656/readme-credly-badges@main
+        uses: jd-35656/readme-credly-badges@v1
 ```
 
 #### ⚙️ Action Inputs
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Update Badges in README
-        uses: jd-35656/readme-credly-badges@main
+        uses: jd-35656/readme-credly-badges@v1
         with:
           credly_username: 'your-credly-username'
           badge_size: '150x150'
