@@ -6,8 +6,8 @@
 
 <!-- List key changes or features -->
 
-- 
-- 
+-
+-
 
 ## Related issue
 
