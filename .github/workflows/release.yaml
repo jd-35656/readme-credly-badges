@@ -24,7 +24,7 @@ jobs:
     outputs:
       release-tag: ${{ steps.get-version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract version from PR title
         id: get-version
@@ -55,7 +55,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Create release
         uses: softprops/action-gh-release@v2
