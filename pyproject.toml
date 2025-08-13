@@ -1,6 +1,6 @@
 [project]
 name = "readme-credly-badges"
-version = "v1.0.1"
+version = "v1.1.0"
 description = "A Python GitHub Action that auto-updates the README with the Credly badge details."
 readme = "README.md"
 keywords = [  ]
