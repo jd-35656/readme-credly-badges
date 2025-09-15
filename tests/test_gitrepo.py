@@ -23,7 +23,7 @@ def mock_github(mock_repo):
 
 @pytest.fixture
 def github_repo(mock_github):
-    MockGithub, mock_repo = mock_github
+    _MockGithub, mock_repo = mock_github
     repo = GithubRepo(
         commit_message="commit",
         repository="test/repo",
@@ -36,7 +36,7 @@ def github_repo(mock_github):
 
 
 def test_initialization_success(mock_github):
-    MockGithub, mock_repo = mock_github
+    _MockGithub, mock_repo = mock_github
 
     repo = GithubRepo(
         commit_message="Init test",
