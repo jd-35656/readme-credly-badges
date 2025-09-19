@@ -1,43 +1,45 @@
-"""Update the version in pyproject.toml using tomli + tomli-w (TOML v1.0 compliant)"""
+from pathlib import Path
 
-import logging
-import sys
-
-import tomli  # type: ignore[import-untyped]
-import tomli_w  # type: ignore[import-untyped]
-
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
-
-ARG_COUNT = 2
-PYPROJECT = "pyproject.toml"
+import tomlkit  # type: ignore[import-untyped]
 
 
-def main():
-    if len(sys.argv) != ARG_COUNT:
-        logger.error("Usage: python update_version.py <version>")
-        sys.exit(1)
+def update_version_in_pyproject(pyproject_path: Path, new_version: str) -> None:
+    """
+    Update the [project].version field in the pyproject.toml file.
 
-    new_version = sys.argv[1]
+    Args:
+        pyproject_path (Path): Path to the pyproject.toml file.
+        new_version (str): New version string to set.
+    """
+    # Read the file
+    content = pyproject_path.read_text(encoding="utf-8")
 
-    try:
-        with open(PYPROJECT, "rb") as f:
-            data = tomli.load(f)
-    except FileNotFoundError:
-        logger.error("pyproject.toml not found.")
-        sys.exit(1)
+    # Parse TOML
+    data = tomlkit.parse(content)
 
+    # Check that the version field exists
     if "project" not in data or "version" not in data["project"]:
-        logger.error("[project].version not found in pyproject.toml")
-        sys.exit(1)
+        raise KeyError("[project].version not found in pyproject.toml")
 
+    # Update version
     data["project"]["version"] = new_version
 
-    with open(PYPROJECT, "w", encoding="utf-8") as f:
-        f.write(tomli_w.dumps(data))
-
-    logger.info(f"Updated version to {new_version}")
+    # Write back to file
+    pyproject_path.write_text(tomlkit.dumps(data), encoding="utf-8")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    EXPECTED_ARG_COUNT = 2
+
+    if len(sys.argv) != EXPECTED_ARG_COUNT:
+        sys.exit(1)
+
+    new_ver = sys.argv[1]
+    pyproject_file = Path("pyproject.toml")
+
+    try:
+        update_version_in_pyproject(pyproject_file, new_ver)
+    except Exception:
+        sys.exit(1)
