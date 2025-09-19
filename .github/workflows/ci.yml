@@ -1,0 +1,121 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - "release/**"
+    paths-ignore:
+      - "docs/**"
+      - ".gitignore"
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    paths-ignore:
+      - "docs/**"
+      - ".gitignore"
+  schedule:
+    - cron: "0 8 * * 1" # Weekly on Monday
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads/release/') && github.ref != 'refs/heads/main' }}
+
+env:
+  default-python: "3.13"
+  FORCE_COLOR: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Cache Nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-${{ matrix.os }}-${{ matrix.python-version }}-
+
+      - name: Install Nox
+        run: pip install nox
+
+      - name: Run tests
+        run: nox --error-on-missing-interpreters --non-interactive --session tests-${{ matrix.python-version }}
+
+  check:
+    name: Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.default-python }}
+          cache: pip
+
+      - name: Cache Nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-ubuntu-latest-${{ env.default-python }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-ubuntu-latest-${{ env.default-python }}-
+
+      - name: Install Nox
+        run: pip install nox
+
+      - name: Run type checking
+        run: nox --error-on-missing-interpreters --non-interactive --session typecheck
+
+  changelog:
+    name: Check changelog fragment
+    if: github.event_name == 'pull_request' && !(contains(github.event.pull_request.labels.*.name, 'no-changelog'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check for changelog fragment
+        run: |
+          # Check for new changelog fragments (only added files)
+          if git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | grep -q "^changelog\.d/"; then
+            echo "Changelog fragment found"
+          else
+            echo "No changelog fragment found"
+            echo "Please add a changelog fragment in changelog.d/ or add the 'no-changelog' label"
+            exit 1
+          fi
+
+  all-green:
+    name: All checks passed
+    if: always()
+    needs: [test, check, changelog]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all successes
+        uses: re-actors/alls-green@v1.2.2
+        with:
+          jobs: ${{ toJSON(needs) }}
