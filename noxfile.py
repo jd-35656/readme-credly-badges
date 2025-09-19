@@ -1,97 +1,114 @@
-import json
-import tempfile
+# ----------------------------
+# Noxfile
+# ----------------------------
+from pathlib import Path
 from typing import Any
 
-import nox
+import nox  # type: ignore[import-untyped]
 
-PYPROECT = nox.project.load_toml()
-PYTHON_VERSIONS = nox.project.python_versions(PYPROECT)
-PYTHON_DEFAULT_VERSION = PYTHON_VERSIONS[-1]
+# ----------------------------
+# Constants / Configuration
+# ----------------------------
+PYPROJECT: dict[str, Any] = nox.project.load_toml()
+PYTHON_VERSIONS: list[str] = nox.project.python_versions(PYPROJECT)
+DEFAULT_PYTHON: str = PYTHON_VERSIONS[-1]
+
+# ----------------------------
+# Settings
+# ----------------------------
+nox.options.sessions = ["tests", "check"]
+nox.options.reuse_existing_virtualenvs = True
 
 
-def get_deps(pyproject: dict[str, Any], group: str) -> list[str]:
-    """Get list of dependencies from pyproject.toml for a given group."""
-    return pyproject["tool"]["nox"]["dependency-group"][group]
+# ----------------------------
+# Helper Functions
+# ----------------------------
+def get_opt_deps(
+    group: str,
+    pyproject: dict[str, Any] = PYPROJECT,
+) -> list[str]:
+    """Fetch dependencies for a given group from pyproject.toml."""
+    if "optional-dependencies" not in pyproject["project"]:
+        raise KeyError("Missing 'optional-dependencies' in pyproject.toml")
+    opt_deps = pyproject["project"]["optional-dependencies"]
+    if group not in opt_deps:
+        raise KeyError(f"Missing group '{group}' in 'optional-dependencies' in pyproject.toml")
+    return opt_deps[group]
 
 
-TEST_DEPENDENCIES = get_deps(PYPROECT, "test")
-DOCS_DEPENDENCIES = get_deps(PYPROECT, "docs")
+def load_dotenv(path: Path = Path(".env")) -> dict[str, str]:
+    """Load simple .env file (KEY=VALUE) into a dict"""
+    if not str(path).endswith(".env"):
+        raise ValueError(f"Provided path must end with '.env': {path}")
+
+    env: dict[str, str] = {}
+    if not path.exists():
+        return env
+
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        env[key.strip()] = value.strip().strip('"').strip("'")
+    return env
+
+
+# ----------------------------
+# Dependency constants
+# ----------------------------
+TEST_DEPS = get_opt_deps("test")
+TYPE_DEPS = get_opt_deps("type")
+
+
+# ----------------------------
+# Dependency constants
+# ----------------------------
+@nox.session(python=PYTHON_VERSIONS)
+def develop(session):
+    session.env.update(load_dotenv())
+    session.run("python", "-m", "pip", "install", "--upgrade", "pip")
+    session.install("-e", ".", *TEST_DEPS, *TYPE_DEPS, "nox")
 
 
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session: nox.Session) -> None:
-    """Tests using local pypiserver only"""
-    session.install(*TEST_DEPENDENCIES, ".")
-    test_dir = session.posargs or ["tests"]
-    session.run("pytest", "--cov=readme_credly_badges", "--cov-report=", *test_dir)
-    session.notify("coverage")
+    session.install("-e", ".", *TEST_DEPS)
+    session.run("pytest", *session.posargs, external=True)
 
 
 @nox.session
-def coverage(session: nox.Session) -> None:
-    """Coverage analysis"""
-    session.install("coverage[toml]")
-    session.run("coverage", "report", "--show-missing", "--fail-under=70")
-    session.run("coverage", "erase")
-
-
-@nox.session(python=PYTHON_DEFAULT_VERSION)
-def lint(session):
+def lint(session: nox.Session) -> None:
     session.install("pre-commit")
-    session.run("pre-commit", "run", "--all-files")
+    session.run("pre-commit", "run", "--all-files", external=True)
 
 
-@nox.session(python=PYTHON_VERSIONS)
-def develop(session):
-    """Set up development environment and load .env inline after installing dependencies."""
-    session.run("python", "-m", "pip", "install", "--upgrade", "pip")
-    session.install(*TEST_DEPENDENCIES, "python-dotenv", ".")
-
-    # Use a temporary file to get clean JSON output from subprocess
-    with tempfile.NamedTemporaryFile(mode="r+", delete=False) as tf:
-        json_path = tf.name
-
-    # Dump the .env variables as JSON into the tempfile using an inline script
-    session.run(
-        "python",
-        "-c",
-        (
-            "import json; "
-            "from pathlib import Path; "
-            "from dotenv import dotenv_values; "
-            f"path = Path('.env'); "
-            f"json.dump(dotenv_values(path) if path.exists() else {{}}, open('{json_path}', 'w'))"
-        ),
-        external=True,
-    )
-
-    # Read and inject into session.env
-    with open(json_path) as f:
-        session.env.update(json.load(f))
-
-    session.log("Loaded .env into session.env")
+@nox.session
+def typecheck(session: nox.Session) -> None:
+    session.install("-e", ".", "mypy", *TEST_DEPS, *TYPE_DEPS)
+    session.run("mypy", "--install-types", "--non-interactive", *session.posargs, external=True)
 
 
-@nox.session(python=PYTHON_DEFAULT_VERSION)
-def build_changelog(session: nox.Session) -> None:
-    session.install("towncrier", ".")
+@nox.session(python=DEFAULT_PYTHON)
+def check(session: nox.Session) -> None:
+    session.notify("lint")
+    session.notify("typecheck")
+
+
+@nox.session(python=DEFAULT_PYTHON)
+def changelog(session: nox.Session) -> None:
+    session.install("towncrier")
     session.run("towncrier", "build", "--version", session.posargs[0], "--yes")
 
 
-@nox.session(python=PYTHON_DEFAULT_VERSION)
-def bump_version(session):
+@nox.session(python=DEFAULT_PYTHON)
+def bump2version(session):
     """Bump project version via update_version.py"""
     session.install("tomli>=2.0.1", "tomli-w>=1.0.0")
 
     if not session.posargs:
-        session.error("Usage: nox -s bump -- <new_version>")
+        session.error("Usage: nox -s bump2version -- <new_version>")
 
     new_version = session.posargs[0]
 
-    session.run("python", "scripts/update_version.py", new_version)
-
-
-@nox.session(name="changelog")
-def changelog(session):
-    session.install(*DOCS_DEPENDENCIES, ".")
-    session.run("towncrier", "build", "--version", session.posargs[0], "--yes")
+    session.run("python", "scripts/bump2version.py", new_version)

@@ -6,7 +6,9 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: check-yaml
+        exclude: ^mkdocs\.yml$
       - id: check-toml
+      - id: check-json
 
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: "v2.6.0"
@@ -14,33 +16,12 @@ repos:
       - id: pyproject-fmt
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.12.11
     hooks:
       - id: ruff-check
         args:
           ["--fix", "--unsafe-fixes", "--show-fixes", "--exit-non-zero-on-fix"]
       - id: ruff-format
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.1
-    hooks:
-      - id: mypy
-        args:
-          [
-            "--warn-unused-ignores",
-            "--strict-equality",
-            "--no-implicit-optional",
-            "--check-untyped-defs",
-          ]
-        additional_dependencies:
-          - "nox"
-          - "tomli"
-          - "tomli_w"
-          - "requests >=2.32.3"
-          - "pygithub >=2.6.1"
-          - "pytest >=8.3.5"
-          - "types-toml"
-          - "types-requests"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
