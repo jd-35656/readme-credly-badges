@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [v1.3.0](https://github.com/jd-35656/readme-credly-badges/tree/v1.3.0) - 2025-09-19
+
+### Changed
+
+- Updated version bump script and pyproject.toml handling for smoother releases. ([#35](https://github.com/jd-35656/readme-credly-badges/issues/35))
+
+
 ## [v1.2.0](https://github.com/jd-35656/readme-credly-badges/tree/v1.2.0) - 2025-09-19
 
 ### Removed

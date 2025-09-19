@@ -1,1 +1,0 @@
-Updated version bump script and pyproject.toml handling for smoother releases.
