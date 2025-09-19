@@ -133,6 +133,5 @@ MIT © [jd-35656](https://github.com/jd-35656)
 
 ## 📚 Documentation
 
-- [📜 Code of Conduct](docs/code_of_conduct.md)
 - [🤝 Contributing](docs/contributing.md)
 - [🕘 Changelog](docs/changelog.md)

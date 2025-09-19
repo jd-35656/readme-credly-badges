@@ -6,14 +6,8 @@ on:
     branches:
       - main
       - "release/**"
-    paths-ignore:
-      - "docs/**"
-      - ".gitignore"
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
-    paths-ignore:
-      - "docs/**"
-      - ".gitignore"
   schedule:
     - cron: "0 8 * * 1" # Weekly on Monday
 
