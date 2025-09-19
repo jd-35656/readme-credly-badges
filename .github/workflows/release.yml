@@ -1,0 +1,167 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Release type"
+        required: true
+        type: choice
+        options:
+          - release:major
+          - release:minor
+          - release:patch
+
+  pull_request:
+    types: [closed]
+
+env:
+  default-python: "3.13"
+
+jobs:
+  prepare-release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'release:major') || contains(github.event.pull_request.labels.*.name, 'release:minor') || contains(github.event.pull_request.labels.*.name, 'release:patch')))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get latest tag
+        run: |
+          git fetch --tags
+          latest_tag=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Determine bump type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            bump="${{ github.event.inputs.release }}"
+          else
+            labels=$(echo '${{ toJSON(github.event.pull_request.labels.*.name) }}')
+            if [[ "$labels" == *"release:major"* ]]; then
+              bump="release:major"
+            elif [[ "$labels" == *"release:minor"* ]]; then
+              bump="release:minor"
+            elif [[ "$labels" == *"release:patch"* ]]; then
+              bump="release:patch"
+            else
+              echo "No release label found. Exiting."
+              exit 0
+            fi
+          fi
+          echo "bump=$bump" >> $GITHUB_ENV
+
+      - name: Bump version
+        run: |
+          IFS='.' read -r major minor patch <<< "${latest_tag#v}"
+          case "$bump" in
+            release:major)
+              major=$((major+1)); minor=0; patch=0 ;;
+            release:minor)
+              minor=$((minor+1)); patch=0 ;;
+            release:patch)
+              patch=$((patch+1)) ;;
+          esac
+          new_version="v$major.$minor.$patch"
+          echo "new_version=$new_version" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.default-python }}
+          cache: pip
+
+      - name: Cache Nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-ubuntu-latest-${{ env.default-python }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-ubuntu-latest-${{ env.default-python }}-
+
+      - name: Install Nox
+        run: pip install nox
+
+      - name: Bump Version
+        run: nox --error-on-missing-interpreters --non-interactive --session bump2version -- ${{ env.new_version }}
+
+      - name: Build changelog
+        run: nox --error-on-missing-interpreters --non-interactive --session changelog -- ${{ env.new_version }}
+
+      - name: Extract release notes
+        run: |
+          python3 -c "
+          import os
+          version = os.environ['new_version']
+          try:
+              with open('docs/changelog.md', 'r') as f:
+                  lines = f.readlines()
+
+              in_section = False
+              notes = []
+
+              for line in lines:
+                  if line.startswith(f'## [{version}]'):
+                      in_section = True
+                      notes.append(line)
+                  elif line.startswith('## [') and in_section:
+                      break
+                  elif in_section:
+                      notes.append(line)
+
+              with open('release_notes.md', 'w') as f:
+                  f.writelines(notes)
+          except Exception as e:
+              print(f'Error: {e}')
+              exit(1)
+          "
+
+      - name: Commit and tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "chore: release ${{ env.new_version }}" || echo "No changes to commit"
+
+          # Delete local release tag if exists
+          git tag -d "${{ env.new_version }}" || echo "Release tag does not exist locally"
+
+          # Extract major version dynamically (remove leading 'v' then split by '.')
+          major_version=$(echo "${{ env.new_version }}" | sed 's/^v//' | cut -d '.' -f1)
+
+          # Construct major tag, e.g., v1 or v2
+          major_tag="v${major_version}"
+
+          # Delete local major tag if exists
+          git tag -d "${major_tag}" || echo "${major_tag} tag does not exist locally"
+
+          # Create annotated release tag
+          git tag -a "${{ env.new_version }}" -m "Release ${{ env.new_version }}"
+
+          # Force-create/move major tag to point to same commit as release tag
+          git tag -f "${major_tag}" "${{ env.new_version }}"
+
+          # Push commits
+          git push origin HEAD
+
+          # Force push release tag
+          git push origin -f "${{ env.new_version }}"
+
+          # Force push major tag (vX)
+          git push origin -f "${major_tag}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.new_version }}
+          name: Release ${{ env.new_version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false

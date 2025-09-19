@@ -2,11 +2,12 @@
 
 import logging
 from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def sort_by_field(data: list[dict], field: str = "issued") -> list[dict]:
+def sort_by_field(data: list[dict[str, Any]], field: str = "issued") -> list[dict[str, Any]]:
     """Sort a list of dictionaries by a specified date field (strict, no fallback)."""
 
     if not data:

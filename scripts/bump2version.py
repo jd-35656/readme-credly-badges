@@ -3,8 +3,8 @@
 import logging
 import sys
 
-import tomli
-import tomli_w
+import tomli  # type: ignore[import-untyped]
+import tomli_w  # type: ignore[import-untyped]
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

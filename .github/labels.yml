@@ -1,0 +1,162 @@
+# Keep a Changelog Categories
+- name: feature
+  color: "0e8a16"
+  description: "New feature or enhancement"
+
+- name: enhancement
+  color: "0e8a16"
+  description: "Improvement to existing functionality"
+
+- name: bug
+  color: "d73a49"
+  description: "Something isn't working"
+
+- name: fix
+  color: "d73a49"
+  description: "Bug fix"
+
+- name: documentation
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: security
+  color: "b60205"
+  description: "Security vulnerability or fix"
+
+- name: performance
+  color: "fbca04"
+  description: "Performance improvement"
+
+- name: breaking-change
+  color: "b60205"
+  description: "Breaking change"
+
+- name: deprecated
+  color: "fef2c0"
+  description: "Feature marked for deprecation"
+
+- name: removed
+  color: "000000"
+  description: "Feature removed"
+
+- name: refactor
+  color: "5319e7"
+  description: "Code refactoring"
+
+- name: test
+  color: "1d76db"
+  description: "Testing related changes"
+
+# Workflow Labels
+- name: dependencies
+  color: "0366d6"
+  description: "Pull requests that update a dependency file"
+
+- name: ci
+  color: "ededed"
+  description: "Continuous integration changes"
+
+- name: chore
+  color: "ededed"
+  description: "Maintenance tasks"
+
+- name: no-changelog
+  color: "ededed"
+  description: "Skip changelog entry"
+
+# Priority Labels
+- name: priority-high
+  color: "d93f0b"
+  description: "High priority"
+
+- name: priority-medium
+  color: "fbca04"
+  description: "Medium priority"
+
+- name: priority-low
+  color: "0e8a16"
+  description: "Low priority"
+
+# Status Labels
+- name: good-first-issue
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: help-wanted
+  color: "008672"
+  description: "Extra attention is needed"
+
+- name: pending-review
+  color: "fbca04"
+  description: "Waiting for review"
+
+- name: waiting-response
+  color: "fef2c0"
+  description: "Waiting for response from author"
+
+- name: planned
+  color: "c2e0c6"
+  description: "Planned for next release"
+
+- name: on-hold
+  color: "d4c5f9"
+  description: "On hold"
+
+- name: wontfix
+  color: "ffffff"
+  description: "This will not be worked on"
+
+- name: duplicate
+  color: "cfd3d7"
+  description: "This issue or pull request already exists"
+
+- name: invalid
+  color: "e4e669"
+  description: "This doesn't seem right"
+
+- name: stale
+  color: "fef2c0"
+  description: "No recent activity"
+
+# Issue Types
+- name: question
+  color: "d876e3"
+  description: "Further information is requested"
+
+- name: discussion
+  color: "c5def5"
+  description: "Discussion or brainstorming"
+
+# Size/Effort Labels
+- name: size-xs
+  color: "3cbf00"
+  description: "Extra small effort"
+
+- name: size-s
+  color: "5d9801"
+  description: "Small effort"
+
+- name: size-m
+  color: "7f7203"
+  description: "Medium effort"
+
+- name: size-l
+  color: "a14c04"
+  description: "Large effort"
+
+- name: size-xl
+  color: "c32505"
+  description: "Extra large effort"
+
+# Release Labels
+- name: release:major
+  color: "b60205"
+  description: "Major version release (breaking changes)"
+
+- name: release:minor
+  color: "0e8a16"
+  description: "Minor version release (new features)"
+
+- name: release:patch
+  color: "fbca04"
+  description: "Patch version release (bug fixes)"
