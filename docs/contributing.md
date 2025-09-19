@@ -65,8 +65,8 @@ Allowed types: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`.
 
 Examples:
 
-* `123.added.md` — Add JSON validation
-* `456.fixed.md` — Fix template loading
+* `123.added.rst` — Add JSON validation
+* `456.fixed.rst` — Fix template loading
 
 ---
 
