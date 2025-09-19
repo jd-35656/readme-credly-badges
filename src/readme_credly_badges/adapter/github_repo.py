@@ -53,7 +53,7 @@ class GithubRepo:
             logger.error(f"Failed to find {self.readme_filename} in repository {self.repository}: {e}")
             raise FileNotFoundError(f"{self.readme_filename} not found in the repository.") from e
 
-    def save_readme(self, new_content: str):
+    def save_readme(self, new_content: str) -> None:
         """Update the specified README file with new content."""
         try:
             logger.info(f"Updating {self.readme_filename} in branch {self.branch} of repository {self.repository}")

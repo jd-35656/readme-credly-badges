@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def generate_new_readme_content(badges, old_readme_content):
+def generate_new_readme_content(badges: list[dict[str, str]], old_readme_content: str) -> str:
     """
     Replace the Credly badges section in the old README content.
     Raises ValueError if the badge comment markers are not found.
@@ -43,7 +43,7 @@ def generate_new_readme_content(badges, old_readme_content):
     return f"{before}{start_comment}\n{markdown_badges}\n{end_comment}{after}"
 
 
-def main():
+def main() -> None:
     "Main function to update the README with Credly badges."
     logger.info("Starting the README update process with Credly badges.")
     if not (CREDLY_USERNAME and GITHUB_TOKEN and GITHUB_REPO):

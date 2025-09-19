@@ -1,5 +1,5 @@
 name: "Readme Credly Badges"
-description: "Add Credly badges to README from your Credly account."
+description: "Add Credly badges to README or any other markdown file from your Credly account."
 author: Jitesh Sahani (JD) <jitesh.sahani@outlook.com>
 
 branding:
@@ -55,28 +55,30 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout user repo
+    - name: Checkout user repository
       uses: actions/checkout@v5
 
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.11"
+        python-version: "3.13"
 
-    - name: Install dependencies
-      run: pip install $GITHUB_ACTION_PATH
+    - name: Install action dependencies
+      run: |
+        pip install "${GITHUB_ACTION_PATH}"
       shell: bash
 
     - name: Run badge updater
-      run: python "$GITHUB_ACTION_PATH/src/readme_credly_badges/entrypoint.py"
+      run: |
+        python "${GITHUB_ACTION_PATH}/src/readme_credly_badges/entrypoint.py"
       shell: bash
       env:
-        INPUT_CREDLY_USERNAME: ${{ inputs.credly_username }}
-        INPUT_BADGE_SIZE: ${{ inputs.badge_size }}
-        INPUT_BADGE_SORT_BY: ${{ inputs.badge_sort_by }}
-        INPUT_GITHUB_API_URL: ${{ inputs.github_api_url }}
-        INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
-        INPUT_GITHUB_REPO: ${{ inputs.github_repo }}
-        INPUT_GITHUB_BRANCH: ${{ inputs.github_branch }}
-        INPUT_README_FILE: ${{ inputs.readme_file }}
-        INPUT_COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        CREDLY_USERNAME: ${{ inputs.credly_username }}
+        BADGE_SIZE: ${{ inputs.badge_size }}
+        BADGE_SORT_BY: ${{ inputs.badge_sort_by }}
+        GITHUB_API_URL: ${{ inputs.github_api_url }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_REPO: ${{ inputs.github_repo }}
+        GITHUB_BRANCH: ${{ inputs.github_branch }}
+        README_FILE: ${{ inputs.readme_file }}
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
