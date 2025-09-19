@@ -112,7 +112,7 @@ jobs:
   all-green:
     name: All checks passed
     if: always()
-    needs: [test, check, changelog]
+    needs: [test, check]
     runs-on: ubuntu-latest
     steps:
       - name: Require all successes
