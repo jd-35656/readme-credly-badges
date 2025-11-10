@@ -11,12 +11,12 @@ repos:
       - id: check-json
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.10.0"
+    rev: "v2.11.1"
     hooks:
       - id: pyproject-fmt
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.0
+    rev: v0.14.4
     hooks:
       - id: ruff-check
         args:
