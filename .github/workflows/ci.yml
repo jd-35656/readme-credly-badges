@@ -1,110 +1,426 @@
-name: Tests & Checks
+name: CI
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - develop
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/**"
+      - "!.github/workflows/**"
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
   schedule:
     - cron: "0 8 * * 1" # Weekly on Monday at 08:00 UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
+  checks: write
 
 env:
   default-python: "3.13"
   FORCE_COLOR: "1"
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUNBUFFERED: "1"
 
 jobs:
+  # ============================================================================
+  # LINTING
+  # Code style and quality checks
+  # ============================================================================
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.default-python }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nox
+
+      - name: Cache nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-lint-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-lint-
+
+      - name: Run linting
+        run: nox -s lint
+
+      - name: Job summary
+        if: failure()
+        run: |
+          echo "## ❌ Linting Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Fix linting issues locally:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "nox -s lint" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # TYPE CHECKING
+  # Static type analysis with mypy
+  # ============================================================================
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.default-python }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nox
+
+      - name: Cache nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-typecheck-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-typecheck-
+
+      - name: Run type checking
+        run: nox -s typecheck
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "## ✅ Type Checking Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Type Checking Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Fix type errors locally:" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "nox -s typecheck" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================================
+  # TESTS
+  # Run test suite across all supported Python versions
+  # ============================================================================
+
   test:
-    name: 🧪 Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Test / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
-      - name: Install Nox
+      - name: Install dependencies
         run: |
-          echo "::group::Installing Nox"
+          python -m pip install --upgrade pip
           pip install nox
-          echo "::endgroup::"
 
-      - name: Run tests
+      - name: Cache nox environments
+        uses: actions/cache@v4
+        with:
+          path: .nox
+          key: nox-tests-${{ matrix.python-version }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
+          restore-keys: |
+            nox-tests-${{ matrix.python-version }}-
+
+      - name: Run tests with coverage
+        run: nox -s tests-${{ matrix.python-version }}
+        env:
+          COVERAGE_FILE: .coverage.${{ matrix.python-version }}
+
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-data-${{ matrix.python-version }}
+          path: .coverage.*
+          retention-days: 1
+          include-hidden-files: true
+
+      - name: Job summary
+        if: always()
         run: |
-          echo "::group::Running tests (Python ${{ matrix.python-version }} on ${{ matrix.os }})"
-          nox --error-on-missing-interpreters --non-interactive --session tests-${{ matrix.python-version }}
-          echo "::endgroup::"
+          echo "## Test Results - Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
-  check:
-    name: 🔍 Type Checking
+  # ============================================================================
+  # COVERAGE
+  # Combine coverage reports and generate summary
+  # ============================================================================
+
+  coverage:
+    name: Coverage Report
+    needs: test
     runs-on: ubuntu-latest
+    if: always()
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Setup Python ${{ env.default-python }}
-        uses: actions/setup-python@v6
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.default-python }}
           cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
 
-      - name: Install Nox
+      - name: Install coverage
         run: |
-          echo "::group::Installing Nox"
-          pip install nox
-          echo "::endgroup::"
+          python -m pip install --upgrade pip
+          pip install coverage[toml]
 
-      - name: Run type checking
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-data-*
+          merge-multiple: true
+
+      - name: Combine coverage data
         run: |
-          echo "::group::Running type checking"
-          nox --error-on-missing-interpreters --non-interactive --session typecheck
-          echo "::endgroup::"
+          python -m coverage combine
+          python -m coverage xml
+          python -m coverage json
+          python -m coverage html
 
-  changelog:
-    name: 📝 Changelog Fragment Check
-    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'no-changelog')
+      - name: Generate coverage report
+        id: coverage
+        run: |
+          echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python -m coverage report >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Extract total coverage percentage
+          COVERAGE=$(python -c "import json; print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          echo "**Total Coverage:** ${COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+          echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            coverage.json
+            htmlcov/
+          retention-days: 30
+
+      - name: Coverage comment
+        if: github.event_name == 'pull_request'
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MINIMUM_GREEN: 90
+          MINIMUM_ORANGE: 70
+
+  # ============================================================================
+  # PULL REQUEST VALIDATION
+  # Checks specific to pull requests
+  # ============================================================================
+
+  pr-title:
+    name: Validate PR Title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^[A-Z].+$
+          subjectPatternError: |
+            The PR title must follow the Conventional Commits format.
+
+            Example: "feat: Add new feature"
+
+            Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+
+  changelog-fragment:
+    name: Validate Changelog Fragment
+    if: |
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'no-changelog') &&
+      !contains(github.event.pull_request.labels.*.name, 'dependencies')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository (full history)
-        uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Verify changelog fragment presence
+      - name: Check for changelog fragment
         run: |
-          echo "::group::Checking changelog fragment"
-          if git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | grep -q "^changelog\.d/"; then
-            echo "✅ Changelog fragment found."
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+
+          echo "🔍 Checking for changelog fragment in PR #${{ github.event.pull_request.number }}"
+          echo "Comparing: $base_sha...$head_sha"
+          echo ""
+
+          # Look for added files in changelog.d/
+          added_files=$(git diff --name-only --diff-filter=A "$base_sha...$head_sha" | grep -E "^changelog\.d/.*\.(md|rst|txt)$" || true)
+
+          if [ -n "$added_files" ]; then
+            echo "✅ Changelog fragment(s) found:"
+            echo "$added_files"
+            echo ""
+
+            # Add to summary
+            echo "## ✅ Changelog Fragment Present" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Found changelog fragment(s):" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$added_files" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ No changelog fragment found."
-            echo "Please add a changelog fragment in changelog.d/ or add the 'no-changelog' label."
+            echo "❌ No changelog fragment found"
+            echo ""
+
+            # Add helpful error to summary
+            echo "## ❌ No Changelog Fragment Found" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Required Action:** Add a changelog fragment or label this PR" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Option 1: Add a changelog fragment" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "# Create a new changelog fragment" >> $GITHUB_STEP_SUMMARY
+            echo "echo 'Brief description of your changes.' > changelog.d/\$(date +%s).md" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Option 2: Add a label" >> $GITHUB_STEP_SUMMARY
+            echo "- \`no-changelog\` - Changes don't need a changelog entry" >> $GITHUB_STEP_SUMMARY
+            echo "- \`dependencies\` - Dependency updates" >> $GITHUB_STEP_SUMMARY
+
             exit 1
           fi
-          echo "::endgroup::"
 
-  all-green:
-    name: ✅ Core Checks Passed
-    if: always()
-    needs: [test, check]
+  dependency-review:
+    name: Review Dependencies
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+
     steps:
-      - name: Verify all core jobs succeeded
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: always
+
+  # ============================================================================
+  # STATUS CHECK
+  # Final gate requiring all critical checks to pass
+  # ============================================================================
+
+  ci-success:
+    name: CI Status
+    if: always()
+    needs:
+      - lint
+      - type-check
+      - test
+      - coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decide whether all required jobs succeeded
         uses: re-actors/alls-green@v1.2.2
         with:
+          allowed-skips: coverage
           jobs: ${{ toJSON(needs) }}
+
+      - name: Generate final summary
+        if: always()
+        run: |
+          echo "## 🎯 CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | \`${{ needs.lint.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Type Check | \`${{ needs.type-check.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | \`${{ needs.test.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Coverage | \`${{ needs.coverage.result }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.lint.result }}" = "success" ] && \
+             [ "${{ needs.type-check.result }}" = "success" ] && \
+             [ "${{ needs.test.result }}" = "success" ]; then
+            echo "### ✅ All Required Checks Passed!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 Ready to merge!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Some Checks Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review and fix the failed jobs above." >> $GITHUB_STEP_SUMMARY
+          fi
