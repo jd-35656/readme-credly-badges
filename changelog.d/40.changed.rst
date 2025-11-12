@@ -1,0 +1,1 @@
+Refactored project structure, linting, formatting, type checking, and test coverage setup
