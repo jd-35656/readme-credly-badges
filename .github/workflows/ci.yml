@@ -1,23 +1,18 @@
-name: Tests
+name: Tests & Checks
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-      - "release/**"
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
   schedule:
-    - cron: "0 8 * * 1" # Weekly on Monday
+    - cron: "0 8 * * 1" # Weekly on Monday at 08:00 UTC
 
 permissions:
   contents: read
   pull-requests: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads/release/') && github.ref != 'refs/heads/main' }}
 
 env:
   default-python: "3.13"
@@ -26,90 +21,90 @@ env:
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    name: 🧪 Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Cache Nox environments
-        uses: actions/cache@v4
-        with:
-          path: .nox
-          key: nox-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
-          restore-keys: |
-            nox-${{ matrix.os }}-${{ matrix.python-version }}-
-
       - name: Install Nox
-        run: pip install nox
+        run: |
+          echo "::group::Installing Nox"
+          pip install nox
+          echo "::endgroup::"
 
       - name: Run tests
-        run: nox --error-on-missing-interpreters --non-interactive --session tests-${{ matrix.python-version }}
+        run: |
+          echo "::group::Running tests (Python ${{ matrix.python-version }} on ${{ matrix.os }})"
+          nox --error-on-missing-interpreters --non-interactive --session tests-${{ matrix.python-version }}
+          echo "::endgroup::"
 
   check:
-    name: Type checking
+    name: 🔍 Type Checking
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Set up Python
+      - name: Setup Python ${{ env.default-python }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ env.default-python }}
           cache: pip
 
-      - name: Cache Nox environments
-        uses: actions/cache@v4
-        with:
-          path: .nox
-          key: nox-ubuntu-latest-${{ env.default-python }}-${{ hashFiles('noxfile.py', 'pyproject.toml') }}
-          restore-keys: |
-            nox-ubuntu-latest-${{ env.default-python }}-
-
       - name: Install Nox
-        run: pip install nox
+        run: |
+          echo "::group::Installing Nox"
+          pip install nox
+          echo "::endgroup::"
 
       - name: Run type checking
-        run: nox --error-on-missing-interpreters --non-interactive --session typecheck
+        run: |
+          echo "::group::Running type checking"
+          nox --error-on-missing-interpreters --non-interactive --session typecheck
+          echo "::endgroup::"
 
   changelog:
-    name: Check changelog fragment
-    if: github.event_name == 'pull_request' && !(contains(github.event.pull_request.labels.*.name, 'no-changelog'))
+    name: 📝 Changelog Fragment Check
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'no-changelog')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Check for changelog fragment
+      - name: Verify changelog fragment presence
         run: |
-          # Check for new changelog fragments (only added files)
+          echo "::group::Checking changelog fragment"
           if git diff --name-only --diff-filter=A ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | grep -q "^changelog\.d/"; then
-            echo "Changelog fragment found"
+            echo "✅ Changelog fragment found."
           else
-            echo "No changelog fragment found"
-            echo "Please add a changelog fragment in changelog.d/ or add the 'no-changelog' label"
+            echo "❌ No changelog fragment found."
+            echo "Please add a changelog fragment in changelog.d/ or add the 'no-changelog' label."
             exit 1
           fi
+          echo "::endgroup::"
 
   all-green:
-    name: All checks passed
+    name: ✅ Core Checks Passed
     if: always()
     needs: [test, check]
     runs-on: ubuntu-latest
     steps:
-      - name: Require all successes
+      - name: Verify all core jobs succeeded
         uses: re-actors/alls-green@v1.2.2
         with:
           jobs: ${{ toJSON(needs) }}
