@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [v1.4.1](https://github.com/jd-35656/readme-credly-badges/tree/v1.4.1) - 2025-11-12
+
+### Security
+
+- update CI/CD workflows and release automation ([#41](https://github.com/jd-35656/readme-credly-badges/issues/41))
+
+
 ## [v1.4.0](https://github.com/jd-35656/readme-credly-badges/tree/v1.4.0) - 2025-11-12
 
 ### Added
