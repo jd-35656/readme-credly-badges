@@ -6,17 +6,11 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: check-yaml
-        exclude: ^mkdocs\.yml$
       - id: check-toml
       - id: check-json
 
-  - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.10.0"
-    hooks:
-      - id: pyproject-fmt
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.0
+    rev: v0.14.4
     hooks:
       - id: ruff-check
         args:

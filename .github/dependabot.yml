@@ -7,16 +7,13 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    groups:
-      python-dependencies:
-        patterns:
-          - "*"
     labels:
       - "dependencies"
       - "no-changelog"
     commit-message:
       prefix: "deps"
-      include: "scope"
+    versioning-strategy: auto
+    rebase-strategy: auto
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -25,14 +22,10 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 3
-    groups:
-      github-actions:
-        patterns:
-          - "*"
     labels:
       - "dependencies"
       - "ci"
       - "no-changelog"
     commit-message:
       prefix: "ci"
-      include: "scope"
+    rebase-strategy: auto

@@ -3,42 +3,60 @@ name = "readme-credly-badges"
 version = "v1.3.0"
 description = "A Python GitHub Action to add Credly badges to README or any other markdown file from your Credly account."
 readme = "README.md"
-keywords = [  ]
+keywords = [
+  "github-action",
+  "credly",
+  "badges",
+  "readme",
+  "markdown",
+  "automation",
+  "python",
+  "ci",
+  "devops",
+  "github",
+  "github-actions",
+  "open-source",
+]
 license = "MIT"
-authors = [ { name = "Jitesh Sahani (JD)", email = "jitesh.sahani@outlook.com" } ]
-requires-python = ">=3.8"
+authors = [{ name = "Jitesh Sahani (JD)", email = "jitesh.sahani@outlook.com" }]
+requires-python = ">=3.9"
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = [ "pygithub>=2.6.1", "requests>=2.32.3" ]
+dependencies = ["pygithub>=2.6.1", "requests>=2.32.3"]
 
-optional-dependencies.test = [ "pytest>=8.3.5", "pytest-cov>=6.1.1", "toml" ]
-optional-dependencies.type = [  ]
+[project.optional-dependencies]
+tests = ["pytest>=8.3.5", "pytest-cov>=6.1.1"]
+types = []
 
-urls.Documentation = "https://github.com/jd-35656/readme-credly-badges#readme"
-urls.Issues = "https://github.com/jd-35656/readme-credly-badges/issues"
-urls.Source = "https://github.com/jd-35656/readme-credly-badges"
+[project.urls]
+Documentation = "https://github.com/jd-35656/readme-credly-badges#readme"
+Issues = "https://github.com/jd-35656/readme-credly-badges/issues"
+Source = "https://github.com/jd-35656/readme-credly-badges"
 
+
+# ---------------------------
+# Ruff (linter / formatter)
+# ---------------------------
 [tool.ruff]
-target-version = "py313"
 line-length = 121
-src = [ "src" ]
+src = ["src", "tests", "scripts"]
 
-format.indent-style = "space"
-format.quote-style = "double"
-format.skip-magic-trailing-comma = false
-lint.select = [
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+select = [
   "A",
   "ARG",
   "B",
@@ -67,47 +85,65 @@ lint.select = [
   "UP",
   "W",
 ]
-lint.per-file-ignores."src/readme_credly_badges/adapter/github_repo.py" = [
-  "PLR0913",
-]
-lint.per-file-ignores."tests/*" = [ "N806", "S101", "S106" ]
-lint.isort.known-first-party = [ "readme_credly_badges" ]
-lint.mccabe.max-complexity = 15
+per-file-ignores."tests/*" = ["N806", "S101", "S106"]
+per-file-ignores."src/readme_credly_badges/adapter/github_repo.py" = ["PLR0913"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["readme_credly_badges"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+
+# ---------------------------
+# Codespell
+# ---------------------------
 [tool.codespell]
 skip = ".nox,.git,venv,__pycache__,.mypy_cache,.ruff_cache"
 check-hidden = true
 quiet-level = 2
 
+
+# ---------------------------
+# Pytest & Coverage
+# ---------------------------
 [tool.pytest.ini_options]
-minversion = "8.0"
-log_cli = true
-log_cli_level = "INFO"
-testpaths = [ "tests" ]
-pythonpath = [ "src" ]
+testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = [
   "-ra",
   "--strict-config",
   "--strict-markers",
-  "--cov=src",
+  "--cov=readme_credly_badges",
   "--cov-report=term-missing",
 ]
 
 [tool.coverage.run]
-source_pkgs = [ "readme_credly_badges" ]
+source = ["readme_credly_badges", "tests"]
 branch = true
 parallel = true
+relative_files = true
 
 [tool.coverage.paths]
-readme_credly_badges = [
+package = [
   "src/readme_credly_badges",
-  "*/readme-credly-badges/src/readme_credly_badges",
+  "*/readme_credly_badges/src/readme_credly_badges",
 ]
+tests = ["tests", "*/readme_credly_badges/tests"]
 
 [tool.coverage.report]
-exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
 fail_under = 90
+show_missing = true
 
+
+# ---------------------------
+# Towncrier (changelog)
+# ---------------------------
 [tool.towncrier]
 directory = "changelog.d"
 filename = "docs/changelog.md"
@@ -115,27 +151,30 @@ package = "readme_credly_badges"
 start_string = "<!-- towncrier release notes start -->\n"
 title_format = "## [{version}](https://github.com/jd-35656/readme-credly-badges/tree/{version}) - {project_date}"
 issue_format = "[#{issue}](https://github.com/jd-35656/readme-credly-badges/issues/{issue})"
-underlines = [ "", "", "" ]
 
 [[tool.towncrier.type]]
 name = "Security"
-
 [[tool.towncrier.type]]
 name = "Removed"
-
 [[tool.towncrier.type]]
 name = "Deprecated"
-
 [[tool.towncrier.type]]
 name = "Added"
-
 [[tool.towncrier.type]]
 name = "Changed"
-
 [[tool.towncrier.type]]
 name = "Fixed"
 
+
+# ---------------------------
+# Mypy (static type checking)
+# ---------------------------
 [tool.mypy]
-files = [ "src" ]
+files = ["src"]
 ignore_missing_imports = true
 strict = true
+pretty = true
+show_error_codes = true
+warn_unused_ignores = true
+warn_unreachable = true
+check_untyped_defs = true
