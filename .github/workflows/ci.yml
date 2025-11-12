@@ -177,7 +177,7 @@ jobs:
           COVERAGE_FILE: .coverage.${{ matrix.python-version }}
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: coverage-data-${{ matrix.python-version }}
@@ -250,7 +250,7 @@ jobs:
           echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-report
           path: |
