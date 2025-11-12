@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [v1.4.0](https://github.com/jd-35656/readme-credly-badges/tree/v1.4.0) - 2025-11-12
+
+### Added
+
+- Automated release workflow, CI improvements, developer tooling, and Dependabot configuration ([#40](https://github.com/jd-35656/readme-credly-badges/issues/40))
+
+### Changed
+
+- Refactored project structure, linting, formatting, type checking, and test coverage setup ([#40](https://github.com/jd-35656/readme-credly-badges/issues/40))
+
+
 ## [v1.3.0](https://github.com/jd-35656/readme-credly-badges/tree/v1.3.0) - 2025-09-19
 
 ### Changed
