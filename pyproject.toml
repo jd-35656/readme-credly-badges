@@ -122,6 +122,7 @@ addopts = [
 source = ["readme_credly_badges", "tests"]
 branch = true
 parallel = true
+relative_files = true
 
 [tool.coverage.paths]
 package = [
