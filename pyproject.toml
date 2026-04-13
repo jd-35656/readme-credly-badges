@@ -34,7 +34,7 @@ classifiers = [
 dependencies = ["pygithub>=2.6.1", "requests>=2.32.3"]
 
 [project.optional-dependencies]
-tests = ["pytest>=8.3.5", "pytest-cov>=6.1.1"]
+tests = ["pytest>=8.4.2", "pytest-cov>=6.1.1"]
 types = []
 
 [project.urls]
