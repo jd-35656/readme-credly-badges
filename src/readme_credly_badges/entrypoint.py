@@ -37,7 +37,7 @@ def generate_new_readme_content(badges: list[dict[str, str]], old_readme_content
         f"https://images.credly.com/size/{BADGE_SIZE}/images/",
     )
 
-    before = old_readme_content.split(start_comment)[0]
+    before = old_readme_content.split(start_comment, maxsplit=1)[0]
     after = old_readme_content.split(end_comment)[1]
 
     return f"{before}{start_comment}\n{markdown_badges}\n{end_comment}{after}"
